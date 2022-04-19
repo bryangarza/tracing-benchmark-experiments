@@ -13,18 +13,27 @@ pub fn create_span_single_field(c: &mut Criterion) {
 
     for rand_string in gen_rand_strings().iter() {
         group.bench_with_input(
-            BenchmarkId::new("subscriber", rand_string.length),
+            BenchmarkId::new("drop_subscriber", rand_string.length),
             &rand_string.s,
             |b, s| {
-                let _guard = tracing_setup::set_up_subscriber();
+                let _guard = tracing_setup::set_up_drop_subscriber();
                 b.iter_with_large_drop(|| info_span!("foo", my_field = ?s));
             },
         );
         group.bench_with_input(
-            BenchmarkId::new("layer", rand_string.length),
+            BenchmarkId::new("drop_layer", rand_string.length),
             &rand_string.s,
             |b, s| {
-                let _guard = tracing_setup::set_up_layer();
+                let _guard = tracing_setup::set_up_drop_layer();
+                b.iter_with_large_drop(|| info_span!("foo", my_field = ?s));
+            },
+        );
+
+        group.bench_with_input(
+            BenchmarkId::new("xray_layer", rand_string.length),
+            &rand_string.s,
+            |b, s| {
+                let _guard = tracing_setup::set_up_xray_layer();
                 b.iter_with_large_drop(|| info_span!("foo", my_field = ?s));
             },
         );
@@ -37,19 +46,29 @@ pub fn enter_span_single_field(c: &mut Criterion) {
 
     for rand_string in gen_rand_strings().iter() {
         group.bench_with_input(
-            BenchmarkId::new("subscriber", rand_string.length),
+            BenchmarkId::new("drop_subscriber", rand_string.length),
             &rand_string.s,
             |b, s| {
-                let _guard = tracing_setup::set_up_subscriber();
+                let _guard = tracing_setup::set_up_drop_subscriber();
                 let span = info_span!("foo", my_field = ?s);
                 b.iter_with_large_drop(|| span.enter());
             },
         );
         group.bench_with_input(
-            BenchmarkId::new("layer", rand_string.length),
+            BenchmarkId::new("drop_layer", rand_string.length),
             &rand_string.s,
             |b, s| {
-                let _guard = tracing_setup::set_up_layer();
+                let _guard = tracing_setup::set_up_drop_layer();
+                let span = info_span!("foo", my_field = ?s);
+                b.iter_with_large_drop(|| span.enter());
+            },
+        );
+
+        group.bench_with_input(
+            BenchmarkId::new("xray_layer", rand_string.length),
+            &rand_string.s,
+            |b, s| {
+                let _guard = tracing_setup::set_up_xray_layer();
                 let span = info_span!("foo", my_field = ?s);
                 b.iter_with_large_drop(|| span.enter());
             },
@@ -63,19 +82,29 @@ pub fn enter_exit_span_single_field(c: &mut Criterion) {
 
     for rand_string in gen_rand_strings().iter() {
         group.bench_with_input(
-            BenchmarkId::new("subscriber", rand_string.length),
+            BenchmarkId::new("drop_subscriber", rand_string.length),
             &rand_string.s,
             |b, s| {
-                let _guard = tracing_setup::set_up_subscriber();
+                let _guard = tracing_setup::set_up_drop_subscriber();
                 let span = info_span!("foo", my_field = ?s);
                 b.iter(|| span.enter());
             },
         );
         group.bench_with_input(
-            BenchmarkId::new("layer", rand_string.length),
+            BenchmarkId::new("drop_layer", rand_string.length),
             &rand_string.s,
             |b, s| {
-                let _guard = tracing_setup::set_up_layer();
+                let _guard = tracing_setup::set_up_drop_layer();
+                let span = info_span!("foo", my_field = ?s);
+                b.iter(|| span.enter());
+            },
+        );
+
+        group.bench_with_input(
+            BenchmarkId::new("xray_layer", rand_string.length),
+            &rand_string.s,
+            |b, s| {
+                let _guard = tracing_setup::set_up_xray_layer();
                 let span = info_span!("foo", my_field = ?s);
                 b.iter(|| span.enter());
             },
@@ -89,14 +118,67 @@ pub fn enter_exit_span_single_field(c: &mut Criterion) {
 macro_rules! create_span_x_fields {
     ( $( $func: ident ),*; $group:ident ) => {
         $(
-            $group.bench_function(format!("subscriber_{}", stringify!($func)), |b| {
-                let _guard = tracing_setup::set_up_subscriber();
+            $group.bench_function(format!("drop_subscriber_{}", stringify!($func)), |b| {
+                let _guard = tracing_setup::set_up_drop_subscriber();
                 b.iter_with_large_drop(|| tbe::$func());
             });
 
-            $group.bench_function(format!("layer_{}", stringify!($func)), |b| {
-                let _guard = tracing_setup::set_up_layer();
+            $group.bench_function(format!("drop_layer_{}", stringify!($func)), |b| {
+                let _guard = tracing_setup::set_up_drop_layer();
                 b.iter_with_large_drop(|| tbe::$func());
+            });
+
+            $group.bench_function(format!("xray_layer_{}", stringify!($func)), |b| {
+                let _guard = tracing_setup::set_up_xray_layer();
+                b.iter_with_large_drop(|| tbe::$func());
+            });
+        )*
+    }
+}
+
+macro_rules! enter_span_x_fields {
+    ( $( $func: ident ),*; $group:ident ) => {
+        $(
+            $group.bench_function(format!("drop_subscriber_{}", stringify!($func)), |b| {
+                let _guard = tracing_setup::set_up_drop_subscriber();
+                let span = tbe::$func();
+                b.iter_with_large_drop(|| span.enter());
+            });
+
+            $group.bench_function(format!("drop_layer_{}", stringify!($func)), |b| {
+                let _guard = tracing_setup::set_up_drop_layer();
+                let span = tbe::$func();
+                b.iter_with_large_drop(|| span.enter());
+            });
+
+            $group.bench_function(format!("xray_layer_{}", stringify!($func)), |b| {
+                let _guard = tracing_setup::set_up_xray_layer();
+                let span = tbe::$func();
+                b.iter_with_large_drop(|| span.enter());
+            });
+        )*
+    }
+}
+
+macro_rules! enter_exit_span_x_fields {
+    ( $( $func: ident ),*; $group:ident ) => {
+        $(
+            $group.bench_function(format!("drop_subscriber_{}", stringify!($func)), |b| {
+                let _guard = tracing_setup::set_up_drop_subscriber();
+                let span = tbe::$func();
+                b.iter(|| span.enter());
+            });
+
+            $group.bench_function(format!("drop_layer_{}", stringify!($func)), |b| {
+                let _guard = tracing_setup::set_up_drop_layer();
+                let span = tbe::$func();
+                b.iter(|| span.enter());
+            });
+
+            $group.bench_function(format!("xray_layer_{}", stringify!($func)), |b| {
+                let _guard = tracing_setup::set_up_xray_layer();
+                let span = tbe::$func();
+                b.iter(|| span.enter());
             });
         )*
     }
@@ -122,105 +204,25 @@ pub fn create_span_multi_field(c: &mut Criterion) {
 pub fn enter_span_multi_field(c: &mut Criterion) {
     let mut group = c.benchmark_group("enter_span_multi_field");
 
-    group.bench_function("subscriber_4_fields", |b| {
-        let _guard = tracing_setup::set_up_subscriber();
-        let span = tbe::span_04_fields();
-        b.iter_with_large_drop(|| span.enter());
-    });
-
-    group.bench_function("subscriber_8_fields", |b| {
-        let _guard = tracing_setup::set_up_subscriber();
-        let span = tbe::span_08_fields();
-        b.iter_with_large_drop(|| span.enter());
-    });
-
-    group.bench_function("subscriber_16_fields", |b| {
-        let _guard = tracing_setup::set_up_subscriber();
-        let span = tbe::span_16_fields();
-        b.iter_with_large_drop(|| span.enter());
-    });
-
-    group.bench_function("subscriber_32_fields", |b| {
-        let _guard = tracing_setup::set_up_subscriber();
-        let span = tbe::span_32_fields();
-        b.iter_with_large_drop(|| span.enter());
-    });
-
-    group.bench_function("layer_4_fields", |b| {
-        let _guard = tracing_setup::set_up_layer();
-        let span = tbe::span_04_fields();
-        b.iter_with_large_drop(|| span.enter());
-    });
-
-    group.bench_function("layer_8_fields", |b| {
-        let _guard = tracing_setup::set_up_layer();
-        let span = tbe::span_08_fields();
-        b.iter_with_large_drop(|| span.enter());
-    });
-
-    group.bench_function("layer_16_fields", |b| {
-        let _guard = tracing_setup::set_up_layer();
-        let span = tbe::span_16_fields();
-        b.iter_with_large_drop(|| span.enter());
-    });
-
-    group.bench_function("layer_32_fields", |b| {
-        let _guard = tracing_setup::set_up_layer();
-        let span = tbe::span_32_fields();
-        b.iter_with_large_drop(|| span.enter());
-    });
+    enter_span_x_fields!(
+        span_04_fields,
+        span_08_fields,
+        span_16_fields,
+        span_32_fields;
+        group
+    );
 }
 
 pub fn enter_exit_span_multi_field(c: &mut Criterion) {
     let mut group = c.benchmark_group("enter_exit_span_multi_field");
 
-    group.bench_function("subscriber_4_fields", |b| {
-        let _guard = tracing_setup::set_up_subscriber();
-        let span = tbe::span_04_fields();
-        b.iter(|| span.enter());
-    });
-
-    group.bench_function("subscriber_8_fields", |b| {
-        let _guard = tracing_setup::set_up_subscriber();
-        let span = tbe::span_08_fields();
-        b.iter(|| span.enter());
-    });
-
-    group.bench_function("subscriber_16_fields", |b| {
-        let _guard = tracing_setup::set_up_subscriber();
-        let span = tbe::span_16_fields();
-        b.iter(|| span.enter());
-    });
-
-    group.bench_function("subscriber_32_fields", |b| {
-        let _guard = tracing_setup::set_up_subscriber();
-        let span = tbe::span_32_fields();
-        b.iter(|| span.enter());
-    });
-
-    group.bench_function("layer_4_fields", |b| {
-        let _guard = tracing_setup::set_up_layer();
-        let span = tbe::span_04_fields();
-        b.iter(|| span.enter());
-    });
-
-    group.bench_function("layer_8_fields", |b| {
-        let _guard = tracing_setup::set_up_layer();
-        let span = tbe::span_08_fields();
-        b.iter(|| span.enter());
-    });
-
-    group.bench_function("layer_16_fields", |b| {
-        let _guard = tracing_setup::set_up_layer();
-        let span = tbe::span_16_fields();
-        b.iter(|| span.enter());
-    });
-
-    group.bench_function("layer_32_fields", |b| {
-        let _guard = tracing_setup::set_up_layer();
-        let span = tbe::span_32_fields();
-        b.iter(|| span.enter());
-    });
+    enter_exit_span_x_fields!(
+        span_04_fields,
+        span_08_fields,
+        span_16_fields,
+        span_32_fields;
+        group
+    );
 }
 
 criterion_group!(

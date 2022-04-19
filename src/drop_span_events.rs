@@ -41,7 +41,7 @@ impl<S> Layer<S> for DropLayer
 where
     S: Subscriber,
 {
-    fn new_span(
+    fn on_new_span(
         &self,
         _attrs: &span::Attributes<'_>,
         _id: &span::Id,

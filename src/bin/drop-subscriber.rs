@@ -5,7 +5,7 @@ use tracing_benchmark_experiments::tracing_setup;
 // with the cargo flamegraph tool
 
 fn main() {
-    tracing_setup::set_up_subscriber();
+    tracing_setup::set_up_drop_subscriber();
     spans::span_08_fields();
 }
 
