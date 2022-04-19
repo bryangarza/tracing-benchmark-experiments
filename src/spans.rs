@@ -7,14 +7,14 @@ pub fn span_00_fields() -> Span {
 
 #[inline(always)]
 pub fn span_04_fields() -> Span {
-    info_span!("foo", a = 1, b = 2, c = 3, d = 4)
+    info_span!("foo", aws.xray.trace_id = "1", b = 2, c = 3, d = 4)
 }
 
 #[inline(always)]
 pub fn span_08_fields() -> Span {
     info_span!(
         "foo",
-        a = 1,
+        aws.xray.trace_id = "1",
         b = 2,
         c = 3,
         d = 4,
@@ -29,7 +29,7 @@ pub fn span_08_fields() -> Span {
 pub fn span_12_fields() -> Span {
     info_span!(
         "foo",
-        a = 1,
+        aws.xray.trace_id = "1",
         b = 2,
         c = 3,
         d = 4,
@@ -48,7 +48,7 @@ pub fn span_12_fields() -> Span {
 pub fn span_16_fields() -> Span {
     info_span!(
         "foo",
-        a = 1,
+        aws.xray.trace_id = "1",
         b = 2,
         c = 3,
         d = 4,
@@ -71,7 +71,7 @@ pub fn span_16_fields() -> Span {
 pub fn span_20_fields() -> Span {
     info_span!(
         "foo",
-        a = 1,
+        aws.xray.trace_id = "1",
         b = 2,
         c = 3,
         d = 4,
@@ -98,7 +98,7 @@ pub fn span_20_fields() -> Span {
 pub fn span_24_fields() -> Span {
     info_span!(
         "foo",
-        a = 1,
+        aws.xray.trace_id = "1",
         b = 2,
         c = 3,
         d = 4,
@@ -129,7 +129,7 @@ pub fn span_24_fields() -> Span {
 pub fn span_28_fields() -> Span {
     info_span!(
         "foo",
-        a = 1,
+        aws.xray.trace_id = "1",
         b = 2,
         c = 3,
         d = 4,
@@ -164,7 +164,7 @@ pub fn span_28_fields() -> Span {
 pub fn span_32_fields() -> Span {
     info_span!(
         "foo",
-        a = 1,
+        aws.xray.trace_id = "1",
         b = 2,
         c = 3,
         d = 4,
