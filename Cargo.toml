@@ -20,4 +20,7 @@ name = "my_benchmark"
 harness = false
 
 [[bin]]
-name = "drop-subscriber"
+name = "drop_subscriber"
+
+[[bin]]
+name = "xray_layer"

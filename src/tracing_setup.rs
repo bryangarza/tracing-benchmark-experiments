@@ -13,7 +13,14 @@ pub fn set_up_drop_layer() -> DefaultGuard {
     tracing::subscriber::set_default(subscriber_with_layer)
 }
 
-pub async fn set_up_xray_layer() -> DefaultGuard {
+pub fn set_up_xray_layer() -> DefaultGuard {
+    let xray = tracing_xray::Layer::new_blocking("tracing-benchmark-experiments".to_owned())
+        .expect("Unable to instantiate tracing-xray layer");
+    let subscriber_with_layer = Registry::default().with(xray);
+    tracing::subscriber::set_default(subscriber_with_layer)
+}
+
+pub async fn set_up_xray_layer_async() -> DefaultGuard {
     let xray = tracing_xray::Layer::new("tracing-benchmark-experiments".to_owned())
         .await
         .expect("Unable to instantiate tracing-xray layer");

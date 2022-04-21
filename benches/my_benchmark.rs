@@ -17,7 +17,7 @@ pub fn create_span_single_field(c: &mut Criterion) {
             &rand_string.s,
             |b, s| {
                 let _guard = tracing_setup::set_up_drop_subscriber();
-                b.iter_with_large_drop(|| info_span!("foo", aws.xray.trace_id = ?s));
+                b.iter_with_large_drop(|| info_span!("foo", my_field = ?s, aws.xray.trace_id = "trace-id"));
             },
         );
         group.bench_with_input(
@@ -25,7 +25,7 @@ pub fn create_span_single_field(c: &mut Criterion) {
             &rand_string.s,
             |b, s| {
                 let _guard = tracing_setup::set_up_drop_layer();
-                b.iter_with_large_drop(|| info_span!("foo", aws.xray.trace_id = ?s));
+                b.iter_with_large_drop(|| info_span!("foo", my_field = ?s, aws.xray.trace_id = "trace-id"));
             },
         );
 
@@ -34,7 +34,7 @@ pub fn create_span_single_field(c: &mut Criterion) {
             &rand_string.s,
             |b, s| {
                 let _guard = tracing_setup::set_up_xray_layer();
-                b.iter_with_large_drop(|| info_span!("foo", aws.xray.trace_id = ?s));
+                b.iter_with_large_drop(|| info_span!("foo", my_field = ?s, aws.xray.trace_id = "trace-id"));
             },
         );
     }
@@ -50,7 +50,7 @@ pub fn enter_span_single_field(c: &mut Criterion) {
             &rand_string.s,
             |b, s| {
                 let _guard = tracing_setup::set_up_drop_subscriber();
-                let span = info_span!("foo", aws.xray.trace_id = ?s);
+                let span = info_span!("foo", my_field = ?s, aws.xray.trace_id = "trace-id");
                 b.iter_with_large_drop(|| span.enter());
             },
         );
@@ -59,7 +59,7 @@ pub fn enter_span_single_field(c: &mut Criterion) {
             &rand_string.s,
             |b, s| {
                 let _guard = tracing_setup::set_up_drop_layer();
-                let span = info_span!("foo", aws.xray.trace_id = ?s);
+                let span = info_span!("foo", my_field = ?s, aws.xray.trace_id = "trace-id");
                 b.iter_with_large_drop(|| span.enter());
             },
         );
@@ -69,7 +69,7 @@ pub fn enter_span_single_field(c: &mut Criterion) {
             &rand_string.s,
             |b, s| {
                 let _guard = tracing_setup::set_up_xray_layer();
-                let span = info_span!("foo", aws.xray.trace_id = ?s);
+                let span = info_span!("foo", my_field = ?s, aws.xray.trace_id = "trace-id");
                 b.iter_with_large_drop(|| span.enter());
             },
         );
@@ -86,7 +86,7 @@ pub fn enter_exit_span_single_field(c: &mut Criterion) {
             &rand_string.s,
             |b, s| {
                 let _guard = tracing_setup::set_up_drop_subscriber();
-                let span = info_span!("foo", aws.xray.trace_id = ?s);
+                let span = info_span!("foo", my_field = ?s, aws.xray.trace_id = "trace-id");
                 b.iter(|| span.enter());
             },
         );
@@ -95,7 +95,7 @@ pub fn enter_exit_span_single_field(c: &mut Criterion) {
             &rand_string.s,
             |b, s| {
                 let _guard = tracing_setup::set_up_drop_layer();
-                let span = info_span!("foo", aws.xray.trace_id = ?s);
+                let span = info_span!("foo", my_field = ?s, aws.xray.trace_id = "trace-id");
                 b.iter(|| span.enter());
             },
         );
@@ -105,7 +105,7 @@ pub fn enter_exit_span_single_field(c: &mut Criterion) {
             &rand_string.s,
             |b, s| {
                 let _guard = tracing_setup::set_up_xray_layer();
-                let span = info_span!("foo", aws.xray.trace_id = ?s);
+                let span = info_span!("foo", my_field = ?s, aws.xray.trace_id = "trace-id");
                 b.iter(|| span.enter());
             },
         );
